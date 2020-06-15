@@ -1,0 +1,27 @@
+---
+- hosts: datacenter
+  sudo: yes
+  tags: [ 'install-git' ]
+
+  tasks:
+  - name: Enure GIT installed
+    yum: name=git state=latest
+
+  - name: first show no config in target directory(home directory)
+    command: git config --global --list
+    ignore_errors: yes    # If need to ignore error raised by particular task
+    register: git_config_before # we capture the module output
+
+  - name: show git config output that we captured in previous task using debug module (verbosity 0)
+    debug: var=git_config_before
+
+  - name: copy master git file to home directory
+    copy: src=master.config dest=~/.gitconfig
+
+  - name: show newly added config file
+    command: git config --global --list
+    ignore_errors: yes
+    register: git_config_after
+
+  - name: show output of previos module - only show std_out lines
+    debug: var=git_config_after.stdout_lines
